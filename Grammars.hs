@@ -4,11 +4,8 @@ module Grammars (myParser, occT, polarities, pre_grammar1, pre_grammar2, pre_gra
 import qualified Data.Set as Set
 import Data.Char (isSpace)
 
-data Type a = Arrow (Type a) (Type a) | Var a    -- representar um tipo. Nas folhas as variaveis tipo. Nos nao folha sem informacao
+data Type a = Arrow (Type a) (Type a) | Var a    
         deriving (Eq, Show)
-
-
--- (Arrow  (Arrow  (Arrow  (Var 'o') (Var 'o')  )  (  Arrow  (  Var 'o'  ) (  Var 'o'  )  )  )  (  Arrow  (  Var 'o'  )  (  Var  'o' ) ))  tipo dado como exemplo no artigo
 
 
 splitExp :: String -> Int -> (String,String)
@@ -30,15 +27,12 @@ myParser [x] = Var x
 
 
 
--- imprime tipo
 printType :: Type Char -> [Char]      
 printType (Var x) = [x]
 printType (Arrow left right) = "(" ++ (printType left) ++ "->" ++ (printType right) ++ ")"
 
 
 
-
--- funcoes auxiliares. Extrair elementos de um tuplo de o conjunto occT
 firstOfThree :: (a, b, c) -> a
 firstOfThree (x, _, _) = x
 
@@ -50,9 +44,9 @@ lastOfThree (_, _, x) = x
 
 
 
--- conjunto occT de um dado tipo
-occT :: Type Char -> Int -> [(Int,Type Char,(Int,Int))]      -- dado um tipo. Descobrir todos os subtipos e atribuir-lhes um inteiro que os identifica unicamente
-occT (Var x) n = [(n,Var x,(n,n))]                           -- quando é uma variavel tipo. Nó folha na representação. (n,n) é para ignorar neste caso
+
+occT :: Type Char -> Int -> [(Int,Type Char,(Int,Int))]      
+occT (Var x) n = [(n,Var x,(n,n))]                          
 occT (Arrow left right) n = occT left n ++ occT right (n1+1) ++ [(n2+1,(Arrow left right),(n1,n2))]
                            where 
                             n1 = firstOfThree (head (reverse (occT left n)))
@@ -63,7 +57,7 @@ occT (Arrow left right) n = occT left n ++ occT right (n1+1) ++ [(n2+1,(Arrow le
 
 polarities :: [(Int,Type Char,(Int,Int))] -> [(Int,Char)]
 polarities [] = []
-polarities xs = helpPols xs (length xs - 1) 1 True  -- começa por atribuir + ao tipo principal. Dado o conjunto occT o ultimo elemento é o tipo principal
+polarities xs = helpPols xs (length xs - 1) 1 True  
 
 helpPols :: [(Int,Type Char,(Int,Int))] -> Int -> Int -> Bool -> [(Int,Char)]
 helpPols xs pos sign flag | lastOfThree (xs !! pos) == (pos,pos) = if sign > 0 || flag then [(pos, if sign > 0 then '+' else '-')] else []
@@ -138,13 +132,8 @@ pre_grammar2 subTipos polars = [ (m,reverse path) | m <- [0..nr-1], get m polars
     where nr = length subTipos
 
 
---data Rule = Int Int 
-
 pre_grammar :: Type Char -> ([(Int,(Int,Int))],[(Int,[Int])])
 pre_grammar tipo = (pre_grammar1 subTipos polars,pre_grammar2 subTipos polars)
                where subTipos = occT tipo 0
                      polars   = polarities subTipos 
 
-
---subTypes = occT (Arrow  (Arrow  (Arrow  (Var 'o') (Var 'o')  )  (  Arrow  (  Var 'o'  ) (  Var 'o'  )  )  )  (  Arrow  (  Var 'o'  )  (  Var  'o' ) )) 0
---polaridades = polarities subTypes

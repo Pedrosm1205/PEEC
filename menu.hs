@@ -1,6 +1,7 @@
 module Main where
 
 import Grammars
+import Inhabitation
 import System.IO (hFlush, stdout)
 
 
@@ -15,7 +16,8 @@ menu = do
     putStrLn "3. rules m => k.n"
     putStrLn "4. rules m => p0n1...ns"
     putStrLn "5. pre-grammar rules"
-    putStrLn "6. Exit"
+    putStrLn "6. Habitated type?"
+    putStrLn "7. Exit"
     putStr "Enter your choice: "
     hFlush stdout  
     choice <- getLine
@@ -39,8 +41,12 @@ menu = do
         "5" -> do
             let output = pre_grammar type_input
             print output
-            menu         
-        "6" -> putStrLn "Exit"
+            menu
+        "6" -> do
+            let output = emptiness type_input
+            print output
+            menu               
+        "7" -> putStrLn "Exit"
         _   -> do
             putStrLn "Invalid choice, try again."
             menu
