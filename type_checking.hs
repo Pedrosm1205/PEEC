@@ -58,8 +58,3 @@ getNs :: Lambda -> [Lambda]
 getNs (App n ns) = getNs n ++ [ns]
 getNs t = [t]
 
-
-
-
-idTerm = Abs 'x' (Variable 'x')
-wrongType = Arrow (Var 'x') (Var 'y') 
